@@ -1,42 +1,58 @@
-import React, { Component } from 'react';
-import Table from './Table';
-import Form from './Form';
+import React from "react";
+import Modal from "./Modal";
+import "./modal.css";
+import image from "./12891.png.avif"
+import Counter from "./Counter"
+import sample_text from "./Kindle.Highlights_The.Crisis.of.Islam"
+import Parser from "./Parser"
 
-class App extends Component {
-    state = {
-        characters: []
-    };
 
-    removeCharacter = index => {
-        const { characters } = this.state;
+
+class App extends React.Component {
+  state = {
     
-        this.setState({
-            characters: characters.filter((character, i) => { 
-                return i !== index;
-            })
-        });
-    }
+    show: false
+  };
 
-    handleSubmit = character => {
-        this.setState({characters: [...this.state.characters, character]});
-    }
+  // const [count, setCount] = useState ();
 
-    render() {
-        const { characters } = this.state;
+  showModal = e => {
+    
+    this.setState({
+      show: !this.state.show
+    });
+  };
+
+  render() {
+    return (
+      <div className="App" style={{display: 'flex',  justifyContent:'center', alignItems:'center', height: '100vh'}}>
         
-        return (
-            <div className="container">
-                <h1>React Tutorial</h1>
-                <p>Add a character with a name and a job to the table.</p>
-                <Table
-                    characterData={characters}
-                    removeCharacter={this.removeCharacter}
-                />
-                <h3>Add New</h3>
-                <Form handleSubmit={this.handleSubmit} />
-            </div>
-        );
-    }
+      <button> Lord</button>
+        <button
+          class="toggle-button"
+          id="centered-toggle-button"
+          onClick={e => {
+            this.showModal(e);
+          }}
+        > <img src={image} className="Sphinx-logo" alt="logo"/>
+          {" "}
+          show Modal{" "}
+        </button>
+
+
+        <Modal class="modal-dialog" onClose={this.showModal} show={this.state.show}>
+         
+         <Parser />
+         <div>
+         <button > 1 Day </button>
+         <button> 2 Days</button>
+         <button> 3 Days </button>
+         </div>
+        
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default App;
