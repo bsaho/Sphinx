@@ -1,20 +1,42 @@
 import React, { Component } from 'react';
 import './App.css';
-
+import Table from "./Table"
 import logo from './logo.svg';
-// import Modal from "./Modal";
-// import image from "./12891.png.avif"
-// import Counter from "./Counter"
-// import sample_text from "./Kindle.Highlights_The.Crisis.of.Islam"
-// import Parser from "./Parser"
-
 
 class App extends Component {
   state = {
     response: '',
     post: '',
     responseToPost: '',
+    show: false,
+    columns: [
+      "Book ",
+      "Author ",
+      "Total Notes ",
+      "No. of Notes",
+      "Note Content"
+
+    ],
+    noteData : []
   };
+
+  showModal = () => {
+    this.setState({ show: true });
+  };
+
+  hideModal = () => {
+    this.setState({ show: false });
+  };
+
+getNoteData = async () => {
+  const response = await fetch ("/api/notes");
+  const body = await response.json ();
+  // console.log (bodega);
+  if (response.status !==200) throw Error (body.message);
+  this.setState ({ noteData : body});
+  
+  
+}  
 
   componentDidMount() {
     this.callApi()
@@ -53,16 +75,15 @@ class App extends Component {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+          <button onClick = {this.getNoteData}> Load Notes</button>
+          
+        
+
         </header>
         <p>{this.state.response}</p>
+    
+
+
         <form onSubmit={this.handleSubmit}>
           <p>
             <strong>Post to Server:</strong>
@@ -75,6 +96,9 @@ class App extends Component {
           <button type="submit">Submit</button>
         </form>
         <p>{this.state.responseToPost}</p>
+        <Table columns={this.state.columns} noteData={this.state.noteData} />
+        
+
       </div>
     );
   }
