@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import "./table.css"
 import ReactModal from 'react-modal';
-
+import MyModal from "./Modal";
+import Collapsible from 'react-collapsible';
+// import Collapsibles from "./Collapsible.css"
 
 class Table extends Component {
     constructor(props) {
@@ -9,7 +11,9 @@ class Table extends Component {
        this.state = {
           currName : '',
           notes: [],
-          showModal : false
+          showModal : false,
+          currName: ''
+          
        }
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -34,8 +38,10 @@ class Table extends Component {
          },
          body: JSON.stringify({ post: name.target.value }),
        });
-       const body = await  response.text();
-       this.setState ({notes: body});
+       const body = await  response.json();
+       this.setState ({ notes: body.highlights});
+       this.setState({currName: body.title});
+      //  console.log (body);
        this.handleOpenModal ();
       
       
@@ -65,11 +71,36 @@ class Table extends Component {
           )
        })
     }
+
+    renderModalData () {
+       const allNotes= this.state.notes;
+      //  const newNotes = Array (allNotes[0]);
+      //  console.log (Array.isArray (allNotes));
+      //  console.log (typeof (allNotes));
+      //  console.log (allNotes);
+       return allNotes.map ((notes,index) =>{
+          const { text } = notes 
+          return (
+            <Collapsible 
+            triggerClassName="CustomTriggerCSS"
+            triggerOpenedClassName="CustomTriggerCSS--open"
+            contentOuterClassName="CustomOuterContentCSS"
+            contentInnerClassName="CustomInnerContentCSS"
+             easing={'cubic-bezier(0.175, 0.885, 0.32, 2.275)'} 
+             key={index} 
+             trigger={`${index}. ${text.split(" ").slice(0,20)}`} 
+             >
+               <p>{text}</p>
+               </Collapsible>
+
+          )
+       })
+    }
  
     render() {
        return (
           <div>
-             <h1 id='title'>React Dynamic Table</h1>
+             <h1 id='title'>Bookshelf </h1>
              <table id='books'>
                 <tbody>
                    <tr>{this.renderTableHeader()}</tr>
@@ -80,8 +111,12 @@ class Table extends Component {
            isOpen={this.state.showModal}
            contentLabel="Minimal Modal Example"
            ariaHideApp={false}
-        >
-          <button onClick={this.handleCloseModal}>Close Modal</button>
+        >  <h1>{this.state.currName}</h1>
+        <button onClick={this.handleCloseModal}>Close Modal</button>
+        <div  className="notesData"> 
+           {this.renderModalData ()}
+        </div>
+         
         </ReactModal>
       </div>
         
@@ -90,3 +125,5 @@ class Table extends Component {
  }
  
  export default Table;
+
+ 

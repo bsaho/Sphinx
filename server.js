@@ -1,15 +1,99 @@
 const express = require('express');
 const fs = require('fs');
+// const request = require('request');
+
 const path = require('path');
+const https = require('https');
+const fetch = require('node-fetch');
+
 
 const parserTools = require ("./client/src/Parser");
 const fileTools = require ("./client/src/fileHandling");
+const bookcovers = require("bookcovers");
 
-// try {
-//   fileTools.readFilesSync ();
-// }catch (error){
-//   console.log (error);
+async function grabHelper (isbn){
+  let results;
+  bookcovers.withIsbn (isbn).then( res => results =  res);
+  return results;
+}
+
+async function grabCover (isbn){
+  const genderTrouble = '0415900433';
+
+    const data = await bookcovers.withIsbn(genderTrouble).then (function (res) {
+      return res;
+    });
+    
+    return data;
+}
+// bookcovers
+//   .withIsbn("9781570273148")
+//   .then(results => console.log (results));
+
+// async function grabCover (isbn){
+//  url =  `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=`
+// //  console.log (url);
+// //  app.get(url, (req, res) => {
+// //   res.send({ express: 'Hello From Express' });
+// // });
+//   // const response = await fetch (url);
+//   // const body = await response.json ();
+//   // // console.log (bodega);
+//   // if (response.status !==200) throw Error (body.message);
+//   // console.log (body);
+
+//   https.get(url, (resp) => {
+//   let data = '';
+
+//   // A chunk of data has been received.
+//   resp.on('data', (chunk) => {
+//     data += chunk;
+//   });
+
+//   // The whole response has been received. Print out the result.
+//   resp.on('end', () => {
+//     // console.log(JSON.parse(data));
+//     return JSON.parse (data);
+//   });
+
+//   // return url ;
+
+// }).on("error", (err) => {
+//   console.log("Error: " + err.message);
+// });
+
+
 // }
+// gBooks = fetch ("https://www.googleapis.com/books/v1/volumes?q=isbn:9780674004238&key=")
+
+
+const xlsxFile = require('read-excel-file/node');
+ 
+function checkReadByShelf (book){
+
+  if (book[18]==="read"){
+    return true;
+  }else {
+    return false;
+  }
+  
+}
+
+function checkReadByDate (book){
+
+  if (book[14]!==null && book[14]!==undefined ){
+    return true;
+  }else {
+    return false;
+  }
+  
+}
+
+
+
+// var workbook = XLSX.readFile('./client/src/goodreads_library_export.xlsx');
+// console.log (workbook.slice (0,1));
+
 
 const bodyParser = require('body-parser');
 const { json } = require('body-parser');
@@ -25,7 +109,58 @@ app.get('/api/hello', (req, res) => {
   res.send({ express: 'Hello From Express' });
 });
 
+app.get('/api/goodreads', (req, res) => {
+  xlsxFile('./client/src/goodreads_library_export.xlsx').then((rows) => {
+    var cols = rows.slice (0,1);
+    console.log (cols);
+    //date read is index 14
+   
+    // newArray = rows.filter ( book => checkReadByDate (book) );
+    readBooks = rows.filter ( book => checkReadByShelf (book) );
+    fixedBooks =[]
+    // console.log (readBooks.length + " " + rows.length);
+    readBooks = readBooks.slice  (0,3)
+  
+    for (let i=0;i<readBooks.length; i++){
+  
+      const title = readBooks[i][1];
+      const author = readBooks[i][2];
+      const author_l_f = readBooks[i][3];
+      const ISBN = readBooks[i][5];
+      const ISBN13 = readBooks[i][6];
+      const googleData = grabCover (ISBN13);
+      console.log (googleData)
+      ;
+      const myRating = readBooks[i][7];
+      const avgRating = readBooks[i][8];
+      const noPages = readBooks[i][11];
+      const originalPubYear = readBooks[i][13];
+      const dateRead = readBooks[i][14];
+      const dateAdded = readBooks[i][15];
+      const myReview = readBooks[i][19];
+      const readCount = readBooks[i][22];
+      fixedBooks.push ({title, author, author_l_f,ISBN,ISBN13,myRating,avgRating,noPages,originalPubYear,dateRead,dateAdded,myReview,readCount,googleData});
+      
+    }
+    
+    // console.log (fixedBooks);
+    try {
+      fs.writeFile("allBooksGoodReads.json", JSON.stringify(fixedBooks), (err) => { 
+        if (err) 
+          console.log(err); 
+        else { 
+          console.log("File written successfully\n"); 
+        //   console.log(fs.readFileSync("books.txt", "utf8")); 
+        } 
+      }); }catch (error){
+        console.log ("Write failed " + error);
+      }
+    
+  })
+  
 
+
+});
 
 app.get('/api/notes', (req, res) => {
   const readFile =fileTools.readFilesSync ();
@@ -77,7 +212,7 @@ app.post('/api/notespec', (req, res) => {
     if (err)  throw err;
     var student = JSON.parse(data);
     console.log (student)
-    res.send (student.highlights);
+    res.send (student);
 })
 
   // console.log (notes);

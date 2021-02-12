@@ -8,7 +8,8 @@ class App extends Component {
     response: '',
     post: '',
     responseToPost: '',
-    show: false,
+    show : false, 
+    showTable: false,
     columns: [
       "Book ",
       "Author ",
@@ -17,7 +18,8 @@ class App extends Component {
       "Note Content"
 
     ],
-    noteData : []
+    noteData : [],
+    shelfData : []
   };
 
   showModal = () => {
@@ -38,7 +40,18 @@ getNoteData = async () => {
   
 }  
 
-  componentDidMount() {
+getGoodReadsData = async () => {
+  const response = await fetch ("/api/goodreads");
+  const body = await response.json ();
+  // console.log (bodega);
+  if (response.status !==200) throw Error (body.message);
+  this.setState ({ shelfData : body});
+  
+  
+}  
+
+
+componentDidMount() {
     this.callApi()
       .then(res => this.setState({ response: res.express }))
       .catch(err => console.log(err));
@@ -75,7 +88,10 @@ getNoteData = async () => {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
-          <button onClick = {this.getNoteData}> Load Notes</button>
+          <div>
+            <button onClick = {this.getNoteData}> Load Notes</button>
+            <button onClick = {this.getGoodReadsData}> Load Goodreads Shelf</button>
+          </div>
           
         
 

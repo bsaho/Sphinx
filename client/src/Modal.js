@@ -1,29 +1,43 @@
 import React from "react";
-import "./modal.css";
+import ReactModal from 'react-modal';
 import PropTypes from "prop-types";
 
+
 export default class Modal extends React.Component {
-  onClose = e => {
-    this.props.onClose && this.props.onClose(e);
-  };
-  render() {
-    if (!this.props.show) {
-      return null;
+  constructor(props) {
+    super(props)
+    this.state = {
+       currName : '',
+       notes: [],
+       showModal : false
     }
-    return (
-      <div class="modal" id="modal">
-        <h2>Modal Window</h2>
-        <div class="content">{this.props.children}</div>
-        <div class="actions">
-          <button class="toggle-button" onClick={this.onClose}>
-            close
-          </button>
-        </div>
-      </div>
-    );
-  }
+ this.handleOpenModal = this.handleOpenModal.bind(this);
+ this.handleCloseModal = this.handleCloseModal.bind(this);
 }
-Modal.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired
-};
+
+handleOpenModal () {
+  this.setState({ showModal: true });
+}
+
+handleCloseModal () {
+  this.setState({ showModal: false });
+}
+
+render() {
+  return (
+     <div>
+       <ReactModal 
+           isOpen={this.state.showModal}
+           contentLabel="Minimal Modal Example"
+           ariaHideApp={false}
+
+        > 
+          <button onClick={this.handleCloseModal}>Close Modal</button>
+        </ReactModal>
+    </div>
+  )
+}
+
+
+
+}
