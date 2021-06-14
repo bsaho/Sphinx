@@ -26,46 +26,6 @@ async function grabCover (isbn){
     
     return data;
 }
-// bookcovers
-//   .withIsbn("9781570273148")
-//   .then(results => console.log (results));
-
-// async function grabCover (isbn){
-//  url =  `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=`
-// //  console.log (url);
-// //  app.get(url, (req, res) => {
-// //   res.send({ express: 'Hello From Express' });
-// // });
-//   // const response = await fetch (url);
-//   // const body = await response.json ();
-//   // // console.log (bodega);
-//   // if (response.status !==200) throw Error (body.message);
-//   // console.log (body);
-
-//   https.get(url, (resp) => {
-//   let data = '';
-
-//   // A chunk of data has been received.
-//   resp.on('data', (chunk) => {
-//     data += chunk;
-//   });
-
-//   // The whole response has been received. Print out the result.
-//   resp.on('end', () => {
-//     // console.log(JSON.parse(data));
-//     return JSON.parse (data);
-//   });
-
-//   // return url ;
-
-// }).on("error", (err) => {
-//   console.log("Error: " + err.message);
-// });
-
-
-// }
-// gBooks = fetch ("https://www.googleapis.com/books/v1/volumes?q=isbn:9780674004238&key=")
-
 
 const xlsxFile = require('read-excel-file/node');
  
@@ -89,27 +49,7 @@ function checkReadByDate (book){
   
 }
 
-
-
-// var workbook = XLSX.readFile('./client/src/goodreads_library_export.xlsx');
-// console.log (workbook.slice (0,1));
-
-
-const bodyParser = require('body-parser');
-const { json } = require('body-parser');
-
-const app = express();
-const port = process.env.PORT || 5000;
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-app.get('/api/hello', (req, res) => {
-  res.send({ express: 'Hello From Express' });
-});
-
-app.get('/api/goodreads', (req, res) => {
+function populateShelf (){
   xlsxFile('./client/src/goodreads_library_export.xlsx').then((rows) => {
     var cols = rows.slice (0,1);
     console.log (cols);
@@ -119,7 +59,7 @@ app.get('/api/goodreads', (req, res) => {
     readBooks = rows.filter ( book => checkReadByShelf (book) );
     fixedBooks =[]
     // console.log (readBooks.length + " " + rows.length);
-    readBooks = readBooks.slice  (0,3)
+    // readBooks = readBooks.slice  (0,3)
   
     for (let i=0;i<readBooks.length; i++){
   
@@ -128,9 +68,9 @@ app.get('/api/goodreads', (req, res) => {
       const author_l_f = readBooks[i][3];
       const ISBN = readBooks[i][5];
       const ISBN13 = readBooks[i][6];
-      const googleData = grabCover (ISBN13);
-      console.log (googleData)
-      ;
+      const googleData = `http://covers.openlibrary.org/b/isbn/${ISBN13}-L.jpg`
+      // const googleData = grabCover (ISBN13);
+      // console.log (googleData) ;
       const myRating = readBooks[i][7];
       const avgRating = readBooks[i][8];
       const noPages = readBooks[i][11];
@@ -157,7 +97,38 @@ app.get('/api/goodreads', (req, res) => {
       }
     
   })
+
   
+
+
+}
+
+
+
+const bodyParser = require('body-parser');
+const { json } = require('body-parser');
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.get('/api/hello', (req, res) => {
+  res.send({ express: 'Hello From Express' });
+});
+
+
+
+
+app.get('/api/goodreads', (req, res) => {
+  filePath="allBooksGoodReads.json";
+  fs.readFile (filePath, (err, data) => {
+    if (err)  throw err;
+    var allBooks = JSON.parse(data);
+    res.send (allBooks);
+})
 
 
 });
@@ -166,28 +137,7 @@ app.get('/api/notes', (req, res) => {
   const readFile =fileTools.readFilesSync ();
   console.log (readFile);
 
-  // const allNotes = new Promise ((resolve, reject) => {
-    
-  //   let notesComp = function () {
-  //     fs.readFile ("./allNotes.json", (err, data) => {
-  //     if (err)  return undefined ;
-  //     var student = JSON.parse(data);
-  //     // console.log (student);
-  //     return student;
-  // })} ();
-  //   if (notesComp!=="undefined"){
-  //     resolve (notesComp);
-  //   }else{
-  //     reject ("Fail");
-  //   }
-  // });
-
-  // allNotes.then ((message) =>{
-  //   // res.json (allNotes);
-  //   console.log ("Created file with " + allNotes.length );
-  // }).catch ((error) => {
-  //   console.log  ("Data receive fail");
-  // });
+  
   res.send (readFile);
 
 });
@@ -203,9 +153,8 @@ app.post('/api/world', (req, res) => {
 });
 
 
+
 app.post('/api/notespec', (req, res) => {
-  // console.log(req.body.post);
-  // notes = fileTools.readSingFile (undefined, req.body.post);
 
   filePath="./client/src/JSON/" + req.body.post + ".json";
   fs.readFile (filePath, (err, data) => {
@@ -222,5 +171,20 @@ app.post('/api/notespec', (req, res) => {
   //   ${parserTools.Parser (jsonSamp)}`, 
   // );
 });
+
+app.post('/api/notesearch', (req, res) => {
+  console.log (req.body.post);
+  // filePath="./client/src/JSON/" + req.body.post + ".json";
+  fs.readFile ("allNotes.json", (err, data) => {
+    if (err)  throw err;
+    var student = JSON.parse(data);
+    specnotes = student.filter (element =>element.title===req.body.post);
+    console.log (specnotes);
+    // console.log (student)
+    res.send (specnotes);
+})
+
+});
+
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

@@ -54,3 +54,13 @@
   background-color: #4CAF50;
   color: white;
 }
+
+#thumb {
+  height: 100px;
+  width: 100px;
+}
+
+.thumb {
+  height: 300px;
+  width: 300px;
+}

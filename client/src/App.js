@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
-import Table from "./Table"
+import Table from "./Table";
 import logo from './logo.svg';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import Shelf from "./Shelf";
 
 class App extends Component {
   state = {
@@ -10,6 +12,7 @@ class App extends Component {
     responseToPost: '',
     show : false, 
     showTable: false,
+    showShelf : false,
     columns: [
       "Book ",
       "Author ",
@@ -19,7 +22,8 @@ class App extends Component {
 
     ],
     noteData : [],
-    shelfData : []
+    shelfData : [],
+    images : []
   };
 
   showModal = () => {
@@ -30,12 +34,21 @@ class App extends Component {
     this.setState({ show: false });
   };
 
+  hideNoteData = () =>{
+    this.setState ({showTable : false });
+  }
+
+  hideGoodreads = () =>{
+    this.setState ({showShelf : false });
+  }
+
 getNoteData = async () => {
   const response = await fetch ("/api/notes");
   const body = await response.json ();
   // console.log (bodega);
   if (response.status !==200) throw Error (body.message);
   this.setState ({ noteData : body});
+  this.setState ({ showTable : true});
   
   
 }  
@@ -43,28 +56,16 @@ getNoteData = async () => {
 getGoodReadsData = async () => {
   const response = await fetch ("/api/goodreads");
   const body = await response.json ();
-  // console.log (bodega);
   if (response.status !==200) throw Error (body.message);
   this.setState ({ shelfData : body});
+  this.setState ({showShelf : true });
+ 
+
   
   
 }  
 
 
-componentDidMount() {
-    this.callApi()
-      .then(res => this.setState({ response: res.express }))
-      .catch(err => console.log(err));
-  }
-
-  callApi = async () => {
-    const response = await fetch('/api/hello');
-    const body = await response.json();
-
-    if (response.status !== 200) throw Error(body.message);
-
-    return body;
-  };
 
   handleSubmit = async e => {
     e.preventDefault();
@@ -85,34 +86,21 @@ componentDidMount() {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
+        
           <div>
-            <button onClick = {this.getNoteData}> Load Notes</button>
-            <button onClick = {this.getGoodReadsData}> Load Goodreads Shelf</button>
+           {this.state.showTable ? <button onClick = {this.hideNoteData}> Hide Notes</button> :<button onClick = {this.getNoteData}> Load Notes</button> }
+           {this.state.showShelf ?  <button onClick = {this.hideGoodreads}> Hide Goodreads Shelf</button> : <button onClick = {this.getGoodReadsData}> Load Goodreads Shelf</button> }
           </div>
           
         
 
         </header>
-        <p>{this.state.response}</p>
+        {/* <p>{this.state.response}</p> */}
     
 
-
-        <form onSubmit={this.handleSubmit}>
-          <p>
-            <strong>Post to Server:</strong>
-          </p>
-          <input
-            type="text"
-            value={this.state.post}
-            onChange={e => this.setState({ post: e.target.value })}
-          />
-          <button type="submit">Submit</button>
-        </form>
-        <p>{this.state.responseToPost}</p>
-        <Table columns={this.state.columns} noteData={this.state.noteData} />
+      
+        {this.state.showTable ? <Table columns={this.state.columns} noteData={this.state.noteData}  /> : null}
+        {this.state.showShelf ? <Shelf shelfData = {this.state.shelfData} /> : null}
         
 
       </div>
