@@ -15,7 +15,7 @@
     "react-collapsible": "^2.8.1",
     "react-modal": "^3.12.1",
     "read-excel-file": "^5.0.0",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "concurrently": "^4.0.1"
